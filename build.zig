@@ -44,12 +44,21 @@ pub fn build(b: *std.Build) void {
     // running `zig build`).
     b.installArtifact(lib);
 
+    // Executable
     const exe = b.addExecutable(.{
         .name = "sol",
         .root_source_file = b.path("src/main.zig"),
         .target = target,
         .optimize = optimize,
     });
+
+    // Dependencies
+    const vaxis = b.dependency("vaxis", .{
+        .target = target,
+        .optimize = optimize,
+    });
+
+    exe.root_module.addImport("vaxis", vaxis.module("vaxis"));
 
     // This declares intent for the executable to be installed into the
     // standard location when the user invokes the "install" step (the default
