@@ -126,7 +126,9 @@ pub const App = struct {
 
     /// Draw our current state
     pub fn draw(self: *App) void {
-        const msg = "☀  Sol: A TUI for Apple calendar";
+        const msgLine1 = "         ☀  Sol         ";
+        const msgLine2 = "A TUI for Apple calendar";
+        const msg = msgLine1 ++ "\n" ++ msgLine2;
 
         // Window is a bounded area with a view to the screen. You cannot draw outside of a windows
         // bounds. They are light structures, not intended to be stored.
@@ -144,8 +146,8 @@ pub const App = struct {
         const child = win.child(.{
             .x_off = (win.width / 2) - 7,
             .y_off = win.height / 2 + 1,
-            .width = .{ .limit = msg.len },
-            .height = .{ .limit = 1 },
+            .width = .{ .limit = msgLine1.len },
+            .height = .{ .limit = 2 },
         });
 
         // mouse events are much easier to handle in the draw cycle. Windows have a helper method to
