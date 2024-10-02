@@ -24,6 +24,24 @@ const Event = union(enum) {
     winsize: vaxis.Winsize,
 };
 
+const dummyCalendar =
+    \\ October 2024
+    \\ Mon Tue Wed Thu Fri Sat Sun
+    \\       1   2 [ 3]  4   5   6
+    \\   7   8   9  10  11  12  13
+    \\  14  15  16  17  18  19  20
+    \\  21  22  23  24  25  26  27
+    \\  28  29  30  31
+;
+
+const dummyEvents =
+    \\ 5 October 2024
+    \\
+    \\ - 13:00 -> 14:00
+    \\   Sync: Sol
+    \\   Guests: uzair@polmath.no
+;
+
 pub const App = struct {
     allocator: std.mem.Allocator,
     should_quit: bool,
@@ -91,7 +109,7 @@ pub const App = struct {
     pub fn draw(self: *App) void {
         const msgLine1 = "         ☀  Sol         ";
         const msgLine2 = "A TUI for Apple calendar";
-        const msg = msgLine1 ++ "\n" ++ msgLine2;
+        _ = msgLine1 ++ "\n" ++ msgLine2;
 
         const win = self.vx.window();
 
@@ -99,19 +117,21 @@ pub const App = struct {
 
         self.vx.setMouseShape(.default);
 
-        const child = win.child(.{
-            .x_off = (win.width / 2) - 7,
-            .y_off = win.height / 2 + 1,
-            .width = .{ .limit = msgLine1.len },
-            .height = .{ .limit = 2 },
+        const eventsPanel = win.child(.{
+            .x_off = 0,
+            .y_off = 0,
+            .width = .{ .limit = win.width / 2 },
+            .border = .{ .where = .all },
         });
 
-        const style: vaxis.Style = if (child.hasMouse(self.mouse)) |_| blk: {
-            self.mouse = null;
-            self.vx.setMouseShape(.pointer);
-            break :blk .{ .reverse = true };
-        } else .{};
+        const calendarPanel = win.child(.{
+            .x_off = (win.width / 2) + 1,
+            .y_off = 0,
+            .width = .{ .limit = win.width / 2 },
+            .border = .{ .where = .all },
+        });
 
-        _ = try child.printSegment(.{ .text = msg, .style = style }, .{});
+        _ = try eventsPanel.printSegment(.{ .text = dummyEvents }, .{});
+        _ = try calendarPanel.printSegment(.{ .text = dummyCalendar }, .{});
     }
 };
