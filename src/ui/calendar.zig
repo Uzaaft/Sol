@@ -46,18 +46,19 @@ const CalendarDateCellDrawOpts = struct {
     isSelected: bool = false,
 };
 
-// FIXME: This segfaults @uzaaft
 fn drawCalendarDateCell(parent: *vaxis.Window, opts: CalendarDateCellDrawOpts) !vaxis.Window {
-    const left = if (opts.isSelected) "[" else " ";
-    const right = if (opts.isSelected) "]" else " ";
+    var window = parent.child(.{
+        .width = .{ .limit = cellWidth },
+    });
 
-    var gpa = std.heap.GeneralPurposeAllocator(.{}){};
-    const allocator = gpa.allocator();
+    _ = try window.printSegment(.{ .text = opts.date }, .{});
 
-    const text = try std.fmt.allocPrint(allocator, "{s}{s}{s}!", .{ left, opts.date, right });
-    defer allocator.free(text);
+    if (opts.isSelected) {
+        _ = try window.printSegment(.{ .text = "[" }, .{ .col_offset = 0 });
+        _ = try window.printSegment(.{ .text = "]" }, .{ .col_offset = 3 });
+    }
 
-    return try drawCalendarCell(parent, .{ .text = text });
+    return window;
 }
 
 const CalendarRowDrawOpts = struct {
@@ -103,7 +104,7 @@ fn drawCalendarDateRow(parent: *vaxis.Window, opts: DrawCalendarDateRowOpts) !va
         var cell = window.child(.{ .x_off = x_off });
         _ = try drawCalendarDateCell(&cell, .{
             .date = cellText,
-            .isSelected = opts.cursorCol == col,
+            .isSelected = opts.isCursorInRow and opts.cursorCol == col,
         });
 
         x_off += cellWidth;
