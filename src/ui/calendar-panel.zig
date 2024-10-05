@@ -1,5 +1,6 @@
 const vaxis = @import("vaxis");
 const colors = @import("../styles/colors.zig");
+const Calendar = @import("calendar.zig");
 
 const dummyCalendar = @embedFile("../assets/dummy-calendar.txt");
 
@@ -7,20 +8,23 @@ pub const CalendarPanelDrawOpts = struct {
     isActivePanel: bool = false,
 };
 
-pub fn draw(win: *vaxis.Window, opts: CalendarPanelDrawOpts) !void {
+pub fn draw(parent: *vaxis.Window, opts: CalendarPanelDrawOpts) !vaxis.Window {
     const calendarPanelBorderColor = if (opts.isActivePanel)
         colors.activeBorderColor
     else
         colors.borderColor;
 
-    const window = win.child(.{
-        .x_off = (win.width / 2) + 1,
+    var window = parent.child(.{
+        .x_off = 0,
         .y_off = 0,
-        .width = .{ .limit = win.width / 2 },
         .border = .{
             .where = .all,
             .style = .{ .fg = calendarPanelBorderColor },
         },
     });
-    _ = try window.printSegment(.{ .text = dummyCalendar }, .{});
+    // _ = try window.printSegment(.{ .text = dummyCalendar }, .{});
+
+    try Calendar.draw(&window);
+
+    return window;
 }

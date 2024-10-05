@@ -1,6 +1,7 @@
 const vaxis = @import("vaxis");
 
 pub fn draw(win: *vaxis.Window) !void {
+    // TODO: create container and draw cells inside that
     try drawCalendarHeaderRow(win);
 }
 
@@ -12,7 +13,7 @@ const CalendarCellDrawOpts = struct {
     text: []const u8,
 };
 
-fn drawCalendarCell(win: *vaxis.Window, opts: CalendarCellDrawOpts) !void {
+fn drawCalendarCell(win: *vaxis.Window, opts: CalendarCellDrawOpts) !vaxis.Window {
     const window = win.child(.{
         .x_off = opts.x_off,
         .y_off = opts.y_off,
@@ -20,6 +21,8 @@ fn drawCalendarCell(win: *vaxis.Window, opts: CalendarCellDrawOpts) !void {
     });
 
     _ = try window.printSegment(.{ .text = opts.text }, .{});
+
+    return window;
 }
 
 const CalendarRowDrawOpts = struct {
@@ -30,8 +33,10 @@ const CalendarRowDrawOpts = struct {
 fn drawCalendarRow(win: *vaxis.Window, opts: CalendarRowDrawOpts) !void {
     var x_off: usize = 0;
 
+    // TODO: create rowContainer and draw cells inside that
+
     for (opts.cellTexts) |cellText| {
-        try drawCalendarCell(win, .{ .x_off = x_off, .y_off = opts.y_off, .text = cellText });
+        _ = try drawCalendarCell(win, .{ .x_off = x_off, .y_off = opts.y_off, .text = cellText });
         x_off += cellWidth;
     }
 }

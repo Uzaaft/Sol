@@ -7,16 +7,15 @@ pub const EventsPanelDrawOpts = struct {
     isActivePanel: bool = true,
 };
 
-pub fn draw(win: *vaxis.Window, opts: EventsPanelDrawOpts) !void {
+pub fn draw(parent: *vaxis.Window, opts: EventsPanelDrawOpts) !vaxis.Window {
     const eventsPanelBorderColor = if (opts.isActivePanel)
         colors.activeBorderColor
     else
         colors.borderColor;
 
-    const window = win.child(.{
+    var window = parent.child(.{
         .x_off = 0,
         .y_off = 0,
-        .width = .{ .limit = win.width / 2 },
         .border = .{
             .where = .all,
             .style = .{ .fg = eventsPanelBorderColor },
@@ -24,4 +23,6 @@ pub fn draw(win: *vaxis.Window, opts: EventsPanelDrawOpts) !void {
     });
 
     _ = try window.printSegment(.{ .text = dummyEvents }, .{});
+
+    return window;
 }
