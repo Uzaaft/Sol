@@ -1,8 +1,8 @@
 const std = @import("std");
 const vaxis = @import("vaxis");
-const Root = @import("./ui/root.zig").Root;
+const Root = @import("./ui/root.zig");
 const Panel = @import("./ui/panel.zig").Panel;
-const keybinds = @import("./modules/keybinds.zig");
+const Keybinds = @import("./modules/keybinds.zig");
 
 pub const panic = vaxis.panic_handler;
 
@@ -84,7 +84,7 @@ pub const App = struct {
     pub fn update(self: *App, event: Event) !void {
         switch (event) {
             .key_press => |key| {
-                keybinds.map(key, self);
+                Keybinds.map(key, self);
             },
             .mouse => |mouse| self.mouse = mouse,
             .winsize => |ws| try self.vx.resize(self.allocator, self.tty.anyWriter(), ws),
@@ -98,9 +98,6 @@ pub const App = struct {
 
         self.vx.setMouseShape(.default);
 
-        const root = try Root.init(&win);
-        defer root.deinit();
-
-        root.draw(.{ .activePanel = self.state.activePanel });
+        Root.draw(&win, .{ .activePanel = self.state.activePanel });
     }
 };
