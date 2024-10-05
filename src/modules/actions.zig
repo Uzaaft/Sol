@@ -14,16 +14,24 @@ pub fn setActivePanel(panel: Panel, app: *App) void {
 pub fn handleMotion(motion: Motion, app: *App) void {
     switch (motion) {
         Motion.left => {
-            moveCalenderCursorLeft(app);
+            if (app.state.activePanel == Panel.calendar) {
+                moveCalenderCursorLeft(app);
+            }
         },
         Motion.right => {
-            moveCalenderCursorRight(app);
+            if (app.state.activePanel == Panel.calendar) {
+                moveCalenderCursorRight(app);
+            }
         },
         Motion.up => {
-            moveCalenderCursorUp(app);
+            if (app.state.activePanel == Panel.calendar) {
+                moveCalenderCursorUp(app);
+            }
         },
         Motion.down => {
-            moveCalenderCursorDown(app);
+            if (app.state.activePanel == Panel.calendar) {
+                moveCalenderCursorDown(app);
+            }
         },
         Motion.contextLeft => {
             // FIXME: not like this. need a motion manager
