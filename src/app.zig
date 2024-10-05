@@ -1,5 +1,7 @@
 const std = @import("std");
 const vaxis = @import("vaxis");
+const Root = @import("./ui/root.zig").Root;
+const Panel = @import("./ui/panel.zig").Panel;
 
 pub const panic = vaxis.panic_handler;
 
@@ -24,12 +26,17 @@ const Event = union(enum) {
     winsize: vaxis.Winsize,
 };
 
+const AppState = struct {
+    activePanel: Panel,
+};
+
 pub const App = struct {
     allocator: std.mem.Allocator,
     should_quit: bool,
     tty: vaxis.Tty,
     vx: vaxis.Vaxis,
     mouse: ?vaxis.Mouse,
+    state: AppState,
 
     pub fn init(allocator: std.mem.Allocator) !App {
         return .{
@@ -38,6 +45,7 @@ pub const App = struct {
             .tty = try vaxis.Tty.init(),
             .vx = try vaxis.init(allocator, .{}),
             .mouse = null,
+            .state = .{ .activePanel = Panel.events },
         };
     }
 
@@ -56,9 +64,7 @@ pub const App = struct {
         try loop.start();
 
         try self.vx.enterAltScreen(self.tty.anyWriter());
-
         try self.vx.queryTerminal(self.tty.anyWriter(), 1 * std.time.ns_per_s);
-
         try self.vx.setMouseMode(self.tty.anyWriter(), true);
 
         while (!self.should_quit) {
@@ -66,7 +72,7 @@ pub const App = struct {
             while (loop.tryEvent()) |event| {
                 try self.update(event);
             }
-            self.draw();
+            try self.draw();
 
             var buffered = self.tty.bufferedWriter();
             try self.vx.render(buffered.writer().any());
@@ -76,9 +82,18 @@ pub const App = struct {
 
     pub fn update(self: *App, event: Event) !void {
         switch (event) {
+            // TODO: Separate keybind logic
             .key_press => |key| {
                 if (key.matches('c', .{ .ctrl = true }))
                     self.should_quit = true;
+                if (key.matches('l', .{ .ctrl = true }))
+                    if (self.state.activePanel != Panel.calendar) {
+                        self.state.activePanel = Panel.calendar;
+                    };
+                if (key.matches('h', .{ .ctrl = true }))
+                    if (self.state.activePanel != Panel.events) {
+                        self.state.activePanel = Panel.events;
+                    };
                 if (key.matches('q', .{}))
                     self.should_quit = true;
             },
@@ -88,30 +103,15 @@ pub const App = struct {
         }
     }
 
-    pub fn draw(self: *App) void {
-        const msgLine1 = "         ☀  Sol         ";
-        const msgLine2 = "A TUI for Apple calendar";
-        const msg = msgLine1 ++ "\n" ++ msgLine2;
-
-        const win = self.vx.window();
-
+    pub fn draw(self: *App) !void {
+        var win = self.vx.window();
         win.clear();
 
         self.vx.setMouseShape(.default);
 
-        const child = win.child(.{
-            .x_off = (win.width / 2) - 7,
-            .y_off = win.height / 2 + 1,
-            .width = .{ .limit = msgLine1.len },
-            .height = .{ .limit = 2 },
-        });
+        const root = try Root.init(&win);
+        defer root.deinit();
 
-        const style: vaxis.Style = if (child.hasMouse(self.mouse)) |_| blk: {
-            self.mouse = null;
-            self.vx.setMouseShape(.pointer);
-            break :blk .{ .reverse = true };
-        } else .{};
-
-        _ = try child.printSegment(.{ .text = msg, .style = style }, .{});
+        root.draw(.{ .activePanel = self.state.activePanel });
     }
 };
