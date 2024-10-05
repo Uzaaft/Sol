@@ -1,9 +1,21 @@
 const vaxis = @import("vaxis");
 
 pub fn draw(parent: *vaxis.Window) !vaxis.Window {
-    var container = parent.child(.{});
-    _ = try drawCalendarHeaderRow(&container);
-    return container;
+    var window = parent.child(.{});
+
+    var titleRow = window.child(.{});
+    var headerRow = window.child(.{ .y_off = 1 });
+
+    _ = try drawCalendarTitle(&titleRow);
+    _ = try drawCalendarHeaderRow(&headerRow);
+
+    return window;
+}
+
+pub fn drawCalendarTitle(parent: *vaxis.Window) !vaxis.Window {
+    var window = parent.child(.{});
+    _ = try window.printSegment(.{ .text = "October 2024" }, .{});
+    return window;
 }
 
 const cellWidth: comptime_int = 4;
