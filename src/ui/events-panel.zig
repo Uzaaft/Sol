@@ -7,35 +7,21 @@ pub const EventsPanelDrawOpts = struct {
     isActivePanel: bool = true,
 };
 
-pub const EventsPanel = struct {
-    vxWin: *vaxis.Window,
+pub fn draw(win: *vaxis.Window, opts: EventsPanelDrawOpts) void {
+    const eventsPanelBorderColor = if (opts.isActivePanel)
+        colors.activeBorderColor
+    else
+        colors.borderColor;
 
-    pub fn init(vxWin: *vaxis.Window) !EventsPanel {
-        return .{
-            .vxWin = vxWin,
-        };
-    }
+    const window = win.child(.{
+        .x_off = 0,
+        .y_off = 0,
+        .width = .{ .limit = win.width / 2 },
+        .border = .{
+            .where = .all,
+            .style = .{ .fg = eventsPanelBorderColor },
+        },
+    });
 
-    pub fn deinit(self: *const EventsPanel) void {
-        _ = self;
-    }
-
-    pub fn draw(self: *const EventsPanel, opts: EventsPanelDrawOpts) void {
-        const eventsPanelBorderColor = if (opts.isActivePanel)
-            colors.activeBorderColor
-        else
-            colors.borderColor;
-
-        const window = self.vxWin.child(.{
-            .x_off = 0,
-            .y_off = 0,
-            .width = .{ .limit = self.vxWin.width / 2 },
-            .border = .{
-                .where = .all,
-                .style = .{ .fg = eventsPanelBorderColor },
-            },
-        });
-
-        _ = try window.printSegment(.{ .text = dummyEvents }, .{});
-    }
-};
+    _ = try window.printSegment(.{ .text = dummyEvents }, .{});
+}
