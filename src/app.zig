@@ -82,6 +82,7 @@ pub const App = struct {
 
     pub fn update(self: *App, event: Event) !void {
         switch (event) {
+            // TODO: Separate keybind logic
             .key_press => |key| {
                 if (key.matches('c', .{ .ctrl = true }))
                     self.should_quit = true;
