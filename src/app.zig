@@ -98,6 +98,6 @@ pub const App = struct {
 
         self.vx.setMouseShape(.default);
 
-        Root.draw(&win, .{ .activePanel = self.state.activePanel });
+        try Root.draw(&win, .{ .activePanel = self.state.activePanel });
     }
 };

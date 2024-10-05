@@ -7,7 +7,7 @@ pub const EventsPanelDrawOpts = struct {
     isActivePanel: bool = true,
 };
 
-pub fn draw(win: *vaxis.Window, opts: EventsPanelDrawOpts) void {
+pub fn draw(win: *vaxis.Window, opts: EventsPanelDrawOpts) !void {
     const eventsPanelBorderColor = if (opts.isActivePanel)
         colors.activeBorderColor
     else

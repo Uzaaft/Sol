@@ -7,7 +7,7 @@ pub const CalendarPanelDrawOpts = struct {
     isActivePanel: bool = false,
 };
 
-pub fn draw(win: *vaxis.Window, opts: CalendarPanelDrawOpts) void {
+pub fn draw(win: *vaxis.Window, opts: CalendarPanelDrawOpts) !void {
     const calendarPanelBorderColor = if (opts.isActivePanel)
         colors.activeBorderColor
     else
