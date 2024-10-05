@@ -1,5 +1,5 @@
 const std = @import("std");
-const CalendarView = @import("calendar-view.zig");
+const App = @import("app.zig");
 
 pub fn main() !void {
     var gpa = std.heap.GeneralPurposeAllocator(.{}){};
@@ -11,7 +11,7 @@ pub fn main() !void {
     }
     const allocator = gpa.allocator();
 
-    var app = try CalendarView.App.init(allocator);
+    var app = try App.App.init(allocator);
     defer app.deinit();
 
     try app.run();
