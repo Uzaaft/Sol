@@ -1,6 +1,12 @@
+const std = @import("std");
 const vaxis = @import("vaxis");
+const GridPosition = @import("../types/grid-position.zig").GridPosition;
 
-pub fn draw(parent: *vaxis.Window) !vaxis.Window {
+const CalendarDrawOpts = struct {
+    cursorPosition: GridPosition = .{ .x = 0, .y = 0 },
+};
+
+pub fn draw(parent: *vaxis.Window, opts: CalendarDrawOpts) !vaxis.Window {
     var window = parent.child(.{});
 
     var titleRow = window.child(.{});
@@ -9,11 +15,10 @@ pub fn draw(parent: *vaxis.Window) !vaxis.Window {
 
     _ = try drawCalendarTitle(&titleRow);
     _ = try drawCalendarHeaderRow(&headerRow);
-    _ = try drawCalendarDateGrid(&dateGrid);
+    _ = try drawCalendarDateGrid(&dateGrid, .{ .cursorPosition = opts.cursorPosition });
 
     return window;
 }
-
 pub fn drawCalendarTitle(parent: *vaxis.Window) !vaxis.Window {
     var window = parent.child(.{});
     _ = try window.printSegment(.{ .text = "October 2024" }, .{});
@@ -36,8 +41,29 @@ fn drawCalendarCell(parent: *vaxis.Window, opts: CalendarCellDrawOpts) !vaxis.Wi
     return window;
 }
 
+const CalendarDateCellDrawOpts = struct {
+    date: []const u8,
+    isSelected: bool = false,
+};
+
+// FIXME: This segfaults @uzaaft
+fn drawCalendarDateCell(parent: *vaxis.Window, opts: CalendarDateCellDrawOpts) !vaxis.Window {
+    const left = if (opts.isSelected) "[" else " ";
+    const right = if (opts.isSelected) "]" else " ";
+
+    var gpa = std.heap.GeneralPurposeAllocator(.{}){};
+    const allocator = gpa.allocator();
+
+    const text = try std.fmt.allocPrint(allocator, "{s}{s}{s}!", .{ left, opts.date, right });
+    defer allocator.free(text);
+
+    return try drawCalendarCell(parent, .{ .text = text });
+}
+
 const CalendarRowDrawOpts = struct {
     cellTexts: [7][]const u8,
+    isCursorInRow: bool = false,
+    cursorCol: usize = 0,
 };
 
 fn drawCalendarRow(parent: *vaxis.Window, opts: CalendarRowDrawOpts) !vaxis.Window {
@@ -63,22 +89,53 @@ fn drawCalendarHeaderRow(parent: *vaxis.Window) !vaxis.Window {
     return window;
 }
 
-fn drawCalendarDateGrid(parent: *vaxis.Window) !vaxis.Window {
+const DrawCalendarDateRowOpts = struct {
+    cellTexts: [7][]const u8,
+    isCursorInRow: bool = false,
+    cursorCol: usize = 0,
+};
+
+fn drawCalendarDateRow(parent: *vaxis.Window, opts: DrawCalendarDateRowOpts) !vaxis.Window {
+    var window = parent.child(.{});
+
+    var x_off: usize = 0;
+    for (opts.cellTexts, 0..) |cellText, col| {
+        var cell = window.child(.{ .x_off = x_off });
+        _ = try drawCalendarDateCell(&cell, .{
+            .date = cellText,
+            .isSelected = opts.cursorCol == col,
+        });
+
+        x_off += cellWidth;
+    }
+
+    return window;
+}
+
+const DrawCalendarDateGridOpts = struct {
+    cursorPosition: GridPosition = .{ .x = 0, .y = 0 },
+};
+
+fn drawCalendarDateGrid(parent: *vaxis.Window, opts: DrawCalendarDateGridOpts) !vaxis.Window {
     var window = parent.child(.{});
 
     const rows = [5][7][]const u8{
-        [7][]const u8{ "    ", "    ", "  1 ", "  2 ", "  3 ", "  4 ", "  5 " },
-        [7][]const u8{ "  6 ", "  7 ", "  8 ", "  9 ", " 10 ", " 11 ", " 12 " },
-        [7][]const u8{ " 13 ", " 14 ", " 15 ", " 16 ", " 17 ", " 18 ", " 19 " },
-        [7][]const u8{ " 20 ", " 21 ", " 22 ", " 23 ", " 24 ", " 25 ", " 26 " },
-        [7][]const u8{ " 27 ", " 28 ", " 29 ", " 30 ", " 31 ", "    ", "    " },
+        [7][]const u8{ "  ", "  ", " 1", " 2", " 3", " 4", " 5" },
+        [7][]const u8{ " 6", " 7", " 8", " 9", "10", "11", "12" },
+        [7][]const u8{ "13", "14", "15", "16", "17", "18", "19" },
+        [7][]const u8{ "20", "21", "22", "23", "24", "25", "26" },
+        [7][]const u8{ "27", "28", "29", "30", "31", "  ", "  " },
     };
 
     var y_off: usize = 0;
 
-    for (rows) |row| {
+    for (rows, 0..) |row, rowIdx| {
         var rowContainer = window.child(.{ .y_off = y_off });
-        _ = try drawCalendarRow(&rowContainer, .{ .cellTexts = row });
+        _ = try drawCalendarDateRow(&rowContainer, .{
+            .cellTexts = row,
+            .isCursorInRow = opts.cursorPosition.y == rowIdx,
+            .cursorCol = opts.cursorPosition.x,
+        });
         y_off += 1;
     }
 
