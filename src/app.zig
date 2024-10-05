@@ -2,6 +2,7 @@ const std = @import("std");
 const vaxis = @import("vaxis");
 const Root = @import("./ui/root.zig").Root;
 const Panel = @import("./ui/panel.zig").Panel;
+const keybinds = @import("./modules/keybinds.zig");
 
 pub const panic = vaxis.panic_handler;
 
@@ -82,20 +83,8 @@ pub const App = struct {
 
     pub fn update(self: *App, event: Event) !void {
         switch (event) {
-            // TODO: Separate keybind logic
             .key_press => |key| {
-                if (key.matches('c', .{ .ctrl = true }))
-                    self.should_quit = true;
-                if (key.matches('l', .{ .ctrl = true }))
-                    if (self.state.activePanel != Panel.calendar) {
-                        self.state.activePanel = Panel.calendar;
-                    };
-                if (key.matches('h', .{ .ctrl = true }))
-                    if (self.state.activePanel != Panel.events) {
-                        self.state.activePanel = Panel.events;
-                    };
-                if (key.matches('q', .{}))
-                    self.should_quit = true;
+                keybinds.map(key, self);
             },
             .mouse => |mouse| self.mouse = mouse,
             .winsize => |ws| try self.vx.resize(self.allocator, self.tty.anyWriter(), ws),
