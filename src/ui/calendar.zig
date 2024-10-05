@@ -63,18 +63,9 @@ fn drawCalendarHeaderRow(parent: *vaxis.Window) !vaxis.Window {
     return window;
 }
 
-// fn drawCalendarDateRow(parent: *vaxis.Window) !vaxis.Window {}
-
 fn drawCalendarDateGrid(parent: *vaxis.Window) !vaxis.Window {
     var window = parent.child(.{});
 
-    // const row1Dates = [7][]const u8{ "    ", "    ", "  1 ", "  2 ", "  3 ", "  4 ", "  5 " };
-    // const row2Dates = [7][]const u8{ "  6 ", "  7 ", "  8 ", "  9 ", " 10 ", " 11 ", " 12 " };
-    // const row3Dates = [7][]const u8{ " 13 ", " 14 ", " 15 ", " 16 ", " 17 ", " 18 ", " 19 " };
-    // const row4Dates = [7][]const u8{ " 20 ", " 21 ", " 22 ", " 23 ", " 24 ", " 25 ", " 26 " };
-    // const row5Dates = [7][]const u8{ " 27 ", " 28 ", " 29 ", " 30 ", " 31 ", "    ", "    " };
-
-    // FIXME: Not like this, we need drawDateCell(...) because the cell needs info such as "isSelected", etc
     const rows = [5][7][]const u8{
         [7][]const u8{ "    ", "    ", "  1 ", "  2 ", "  3 ", "  4 ", "  5 " },
         [7][]const u8{ "  6 ", "  7 ", "  8 ", "  9 ", " 10 ", " 11 ", " 12 " },
