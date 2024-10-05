@@ -47,11 +47,7 @@ const CalendarDateCellDrawOpts = struct {
 };
 
 fn drawCalendarDateCell(parent: *vaxis.Window, opts: CalendarDateCellDrawOpts) !vaxis.Window {
-    var window = parent.child(.{
-        .width = .{ .limit = cellWidth },
-    });
-
-    _ = try window.printSegment(.{ .text = opts.date }, .{});
+    var window = try drawCalendarCell(parent, .{ .text = opts.date });
 
     if (opts.isSelected) {
         _ = try window.printSegment(.{ .text = "[" }, .{ .col_offset = 0 });
