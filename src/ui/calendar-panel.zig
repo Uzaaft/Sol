@@ -3,6 +3,7 @@ const colors = @import("../styles/colors.zig");
 const Calendar = @import("calendar.zig");
 const GridPosition = @import("../types/grid-position.zig").GridPosition;
 const Padding = @import("../types/padding.zig").Padding;
+const Label = @import("./components//label.zig");
 
 pub const CalendarPanelDrawOpts = struct {
     isActivePanel: bool = false,
@@ -23,6 +24,7 @@ pub fn draw(parent: *vaxis.Window, opts: CalendarPanelDrawOpts) !vaxis.Window {
             .style = .{ .fg = borderColor },
         },
     });
+    _ = try Label.draw(parent, .{ .text = opts.label, .color = borderColor });
 
     var content = window.child(.{
         .x_off = opts.padding.x,
@@ -30,10 +32,6 @@ pub fn draw(parent: *vaxis.Window, opts: CalendarPanelDrawOpts) !vaxis.Window {
     });
 
     _ = try Calendar.draw(&content, .{ .cursorPosition = opts.calendarCursorPosition });
-
-    // Label (drawn on top)
-    const labelContainer = parent.child(.{});
-    _ = try labelContainer.printSegment(.{ .text = opts.label, .style = .{ .fg = borderColor } }, .{ .col_offset = 2 });
 
     return window;
 }

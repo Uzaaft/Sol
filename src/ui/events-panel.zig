@@ -1,6 +1,7 @@
 const vaxis = @import("vaxis");
 const colors = @import("../styles/colors.zig");
 const Padding = @import("../types/padding.zig").Padding;
+const Label = @import("./components/label.zig");
 
 const dummyEvents = @embedFile("../assets/dummy-events.txt");
 
@@ -24,6 +25,7 @@ pub fn draw(parent: *vaxis.Window, opts: EventsPanelDrawOpts) !vaxis.Window {
             .style = .{ .fg = borderColor },
         },
     });
+    _ = try Label.draw(parent, .{ .text = opts.label, .color = borderColor });
 
     var content = window.child(.{
         .x_off = opts.padding.x,
@@ -31,9 +33,6 @@ pub fn draw(parent: *vaxis.Window, opts: EventsPanelDrawOpts) !vaxis.Window {
     });
 
     _ = try content.printSegment(.{ .text = dummyEvents }, .{});
-
-    const label = parent.child(.{});
-    _ = try label.printSegment(.{ .text = opts.label, .style = .{ .fg = borderColor } }, .{ .col_offset = 2 });
 
     return window;
 }
