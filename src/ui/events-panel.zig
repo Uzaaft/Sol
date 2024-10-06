@@ -7,7 +7,7 @@ const dummyEvents = @embedFile("../assets/dummy-events.txt");
 
 pub const EventsPanelDrawOpts = struct {
     isActivePanel: bool = true,
-    label: []const u8 = "Events",
+    label: []const u8 = " Events ",
     padding: Padding = .{ .x = 1, .y = 1 },
 };
 

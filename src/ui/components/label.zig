@@ -9,6 +9,6 @@ const LabelDrawOpts = struct {
 
 pub fn draw(parent: *vaxis.Window, opts: LabelDrawOpts) !vaxis.Window {
     const window = parent.child(.{});
-    _ = try window.printSegment(.{ .text = opts.text, .style = .{ .fg = opts.color } }, .{ .col_offset = opts.y_off });
+    _ = try window.printSegment(.{ .text = opts.text, .style = .{ .fg = opts.color, .bold = true } }, .{ .col_offset = opts.y_off });
     return window;
 }

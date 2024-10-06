@@ -8,7 +8,7 @@ const Label = @import("./components//label.zig");
 pub const CalendarPanelDrawOpts = struct {
     isActivePanel: bool = false,
     calendarCursorPosition: GridPosition = .{ .x = 0, .y = 0 },
-    label: []const u8 = "Calendar",
+    label: []const u8 = " Calendar ",
     padding: Padding = .{ .x = 1, .y = 1 },
 };
 
