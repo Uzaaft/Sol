@@ -3,6 +3,7 @@ const vaxis = @import("vaxis");
 const Root = @import("./ui/root.zig");
 const Panel = @import("./ui/panel.zig").Panel;
 const Keybinds = @import("./modules/keybinds.zig");
+const GridPosition = @import("./types/grid-position.zig").GridPosition;
 
 pub const panic = vaxis.panic_handler;
 
@@ -29,6 +30,7 @@ const Event = union(enum) {
 
 const AppState = struct {
     activePanel: Panel,
+    calendarCursorPosition: GridPosition = .{ .x = 0, .y = 0 },
 };
 
 pub const App = struct {
@@ -98,6 +100,9 @@ pub const App = struct {
 
         self.vx.setMouseShape(.default);
 
-        Root.draw(&win, .{ .activePanel = self.state.activePanel });
+        try Root.draw(&win, .{
+            .activePanel = self.state.activePanel,
+            .calendarCursorPosition = self.state.calendarCursorPosition,
+        });
     }
 };

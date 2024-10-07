@@ -1,26 +1,37 @@
 const vaxis = @import("vaxis");
 const colors = @import("../styles/colors.zig");
-
-const dummyCalendar = @embedFile("../assets/dummy-calendar.txt");
+const Calendar = @import("calendar.zig");
+const GridPosition = @import("../types/grid-position.zig").GridPosition;
+const Padding = @import("../types/padding.zig").Padding;
+const Label = @import("./components//label.zig");
 
 pub const CalendarPanelDrawOpts = struct {
     isActivePanel: bool = false,
+    calendarCursorPosition: GridPosition = .{ .x = 0, .y = 0 },
+    label: []const u8 = " Calendar ",
+    padding: Padding = .{ .x = 1, .y = 1 },
 };
 
-pub fn draw(win: *vaxis.Window, opts: CalendarPanelDrawOpts) void {
-    const calendarPanelBorderColor = if (opts.isActivePanel)
+pub fn draw(parent: *vaxis.Window, opts: CalendarPanelDrawOpts) !vaxis.Window {
+    const borderColor = if (opts.isActivePanel)
         colors.activeBorderColor
     else
         colors.borderColor;
 
-    const window = win.child(.{
-        .x_off = (win.width / 2) + 1,
-        .y_off = 0,
-        .width = .{ .limit = win.width / 2 },
+    var window = parent.child(.{
         .border = .{
             .where = .all,
-            .style = .{ .fg = calendarPanelBorderColor },
+            .style = .{ .fg = borderColor },
         },
     });
-    _ = try window.printSegment(.{ .text = dummyCalendar }, .{});
+    _ = try Label.draw(parent, .{ .text = opts.label, .color = borderColor });
+
+    var content = window.child(.{
+        .x_off = opts.padding.x,
+        .y_off = opts.padding.y,
+    });
+
+    _ = try Calendar.draw(&content, .{ .cursorPosition = opts.calendarCursorPosition });
+
+    return window;
 }
