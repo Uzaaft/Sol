@@ -1,6 +1,7 @@
 const std = @import("std");
 const vaxis = @import("vaxis");
 const GridPosition = @import("../types/grid-position.zig").GridPosition;
+const Colors = @import("../styles/colors.zig");
 
 const CalendarDrawOpts = struct {
     cursorPosition: GridPosition = .{ .x = 0, .y = 0 },
@@ -29,6 +30,7 @@ const cellWidth: comptime_int = 4;
 
 const CalendarCellDrawOpts = struct {
     text: []const u8,
+    isHighlighted: bool = false,
 };
 
 fn drawCalendarCell(parent: *vaxis.Window, opts: CalendarCellDrawOpts) !vaxis.Window {
@@ -36,7 +38,15 @@ fn drawCalendarCell(parent: *vaxis.Window, opts: CalendarCellDrawOpts) !vaxis.Wi
         .width = .{ .limit = cellWidth },
     });
 
-    _ = try window.printSegment(.{ .text = opts.text }, .{});
+    const selectedStyle: vaxis.Style = .{ .bg = .{ .rgb = Colors.selectedBgCellColor } };
+    const defaultStyle: vaxis.Style = .{};
+
+    const chosenStyle: vaxis.Style = switch (opts.isHighlighted) {
+        true => selectedStyle,
+        else => defaultStyle,
+    };
+
+    _ = try window.printSegment(.{ .text = opts.text, .style = chosenStyle }, .{});
 
     return window;
 }
@@ -47,12 +57,15 @@ const CalendarDateCellDrawOpts = struct {
 };
 
 fn drawCalendarDateCell(parent: *vaxis.Window, opts: CalendarDateCellDrawOpts) !vaxis.Window {
-    var window = try drawCalendarCell(parent, .{ .text = opts.date });
+    const window = try drawCalendarCell(parent, .{
+        .text = opts.date,
+        .isHighlighted = opts.isSelected,
+    });
 
-    if (opts.isSelected) {
-        _ = try window.printSegment(.{ .text = "[" }, .{ .col_offset = 0 });
-        _ = try window.printSegment(.{ .text = "]" }, .{ .col_offset = 3 });
-    }
+    // if (opts.isSelected) {
+    //     _ = try window.printSegment(.{ .text = "[" }, .{ .col_offset = 0 });
+    //     _ = try window.printSegment(.{ .text = "]" }, .{ .col_offset = 3 });
+    // }
 
     return window;
 }
