@@ -1,6 +1,7 @@
 const std = @import("std");
 const vaxis = @import("vaxis");
 const GridPosition = @import("../types/grid-position.zig").GridPosition;
+const Colors = @import("../styles/colors.zig");
 
 const CalendarDrawOpts = struct {
     cursorPosition: GridPosition = .{ .x = 0, .y = 0 },
@@ -25,10 +26,11 @@ pub fn drawCalendarTitle(parent: *vaxis.Window) !vaxis.Window {
     return window;
 }
 
-const cellWidth: comptime_int = 4;
+const cellWidth: comptime_int = 3;
 
 const CalendarCellDrawOpts = struct {
     text: []const u8,
+    isHighlighted: bool = false,
 };
 
 fn drawCalendarCell(parent: *vaxis.Window, opts: CalendarCellDrawOpts) !vaxis.Window {
@@ -36,7 +38,15 @@ fn drawCalendarCell(parent: *vaxis.Window, opts: CalendarCellDrawOpts) !vaxis.Wi
         .width = .{ .limit = cellWidth },
     });
 
-    _ = try window.printSegment(.{ .text = opts.text }, .{});
+    const selectedStyle: vaxis.Style = .{ .bg = Colors.selectedBgCellColor, .fg = Colors.selectedFgCellColor };
+    const defaultStyle: vaxis.Style = .{};
+
+    const chosenStyle: vaxis.Style = switch (opts.isHighlighted) {
+        true => selectedStyle,
+        else => defaultStyle,
+    };
+
+    _ = try window.printSegment(.{ .text = opts.text, .style = chosenStyle }, .{});
 
     return window;
 }
@@ -47,12 +57,10 @@ const CalendarDateCellDrawOpts = struct {
 };
 
 fn drawCalendarDateCell(parent: *vaxis.Window, opts: CalendarDateCellDrawOpts) !vaxis.Window {
-    var window = try drawCalendarCell(parent, .{ .text = opts.date });
-
-    if (opts.isSelected) {
-        _ = try window.printSegment(.{ .text = "[" }, .{ .col_offset = 0 });
-        _ = try window.printSegment(.{ .text = "]" }, .{ .col_offset = 3 });
-    }
+    const window = try drawCalendarCell(parent, .{
+        .text = opts.date,
+        .isHighlighted = opts.isSelected,
+    });
 
     return window;
 }
@@ -80,7 +88,7 @@ fn drawCalendarRow(parent: *vaxis.Window, opts: CalendarRowDrawOpts) !vaxis.Wind
 fn drawCalendarHeaderRow(parent: *vaxis.Window) !vaxis.Window {
     var window = parent.child(.{});
 
-    const days = [7][]const u8{ "Mon ", "Tue ", "Wed ", "Thu ", "Fri ", "Sat ", "Sun " };
+    const days = [7][]const u8{ " Mo", " Tu", " We", " Th", " Fr", " Sa", " Su" };
     _ = try drawCalendarRow(&window, .{ .cellTexts = days });
 
     return window;
@@ -117,11 +125,11 @@ fn drawCalendarDateGrid(parent: *vaxis.Window, opts: DrawCalendarDateGridOpts) !
     var window = parent.child(.{});
 
     const rows = [5][7][]const u8{
-        [7][]const u8{ "    ", "    ", "  1 ", "  2 ", "  3 ", "  4 ", "  5 " },
-        [7][]const u8{ "  6 ", "  7 ", "  8 ", "  9 ", " 10 ", " 11 ", " 12 " },
-        [7][]const u8{ " 13 ", " 14 ", " 15 ", " 16 ", " 17 ", " 18 ", " 19 " },
-        [7][]const u8{ " 20 ", " 21 ", " 22 ", " 23 ", " 24 ", " 25 ", " 26 " },
-        [7][]const u8{ " 27 ", " 28 ", " 29 ", " 30 ", " 31 ", "    ", "    " },
+        [7][]const u8{ "   ", "   ", "  1", "  2", "  3", "  4", "  5" },
+        [7][]const u8{ "  6", "  7", "  8", "  9", " 10", " 11", " 12" },
+        [7][]const u8{ " 13", " 14", " 15", " 16", " 17", " 18", " 19" },
+        [7][]const u8{ " 20", " 21", " 22", " 23", " 24", " 25", " 26" },
+        [7][]const u8{ " 27", " 28", " 29", " 30", " 31", "   ", "   " },
     };
 
     var y_off: usize = 0;
