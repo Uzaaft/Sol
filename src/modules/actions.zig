@@ -37,10 +37,10 @@ pub fn handleMotion(motion: Motion, app: *App) void {
             // FIXME: not like this. need a motion manager
             // which checks the current context and takes appropriate action
             // for that context
-            setActivePanel(Panel.events, app);
+            setActivePanel(Panel.calendar, app);
         },
         Motion.contextRight => {
-            setActivePanel(Panel.calendar, app);
+            setActivePanel(Panel.events, app);
         },
         Motion.contextUp => {},
         Motion.contextDown => {},

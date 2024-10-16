@@ -3,6 +3,10 @@ const vaxis = @import("vaxis");
 const GridPosition = @import("../types/grid-position.zig").GridPosition;
 const Colors = @import("../styles/colors.zig");
 
+const cellWidth: comptime_int = 12;
+const cellHeight: comptime_int = 5;
+const headerHeight: comptime_int = 1;
+
 const CalendarDrawOpts = struct {
     cursorPosition: GridPosition = .{ .x = 0, .y = 0 },
 };
@@ -12,7 +16,7 @@ pub fn draw(parent: *vaxis.Window, opts: CalendarDrawOpts) !vaxis.Window {
 
     var titleRow = window.child(.{});
     var headerRow = window.child(.{ .y_off = 1 });
-    var dateGrid = window.child(.{ .y_off = 2 });
+    var dateGrid = window.child(.{ .y_off = headerHeight + 1 });
 
     _ = try drawCalendarTitle(&titleRow);
     _ = try drawCalendarHeaderRow(&headerRow);
@@ -26,16 +30,16 @@ pub fn drawCalendarTitle(parent: *vaxis.Window) !vaxis.Window {
     return window;
 }
 
-const cellWidth: comptime_int = 3;
-
 const CalendarCellDrawOpts = struct {
     text: []const u8,
     isHighlighted: bool = false,
+    isHeaderCell: bool = false,
 };
 
 fn drawCalendarCell(parent: *vaxis.Window, opts: CalendarCellDrawOpts) !vaxis.Window {
     var window = parent.child(.{
         .width = .{ .limit = cellWidth },
+        .height = .{ .limit = if (opts.isHeaderCell) cellHeight else headerHeight },
     });
 
     const selectedStyle: vaxis.Style = .{ .bg = Colors.selectedBgCellColor, .fg = Colors.selectedFgCellColor };
@@ -69,6 +73,7 @@ const CalendarRowDrawOpts = struct {
     cellTexts: [7][]const u8,
     isCursorInRow: bool = false,
     cursorCol: usize = 0,
+    isHeaderRow: bool = false,
 };
 
 fn drawCalendarRow(parent: *vaxis.Window, opts: CalendarRowDrawOpts) !vaxis.Window {
@@ -76,8 +81,8 @@ fn drawCalendarRow(parent: *vaxis.Window, opts: CalendarRowDrawOpts) !vaxis.Wind
 
     var x_off: usize = 0;
     for (opts.cellTexts) |cellText| {
-        var cell = window.child(.{ .x_off = x_off });
-        _ = try drawCalendarCell(&cell, .{ .text = cellText });
+        var cell = window.child(.{ .x_off = x_off, .height = .{ .limit = if (opts.isHeaderRow) cellHeight else headerHeight } });
+        _ = try drawCalendarCell(&cell, .{ .text = cellText, .isHeaderCell = opts.isHeaderRow });
 
         x_off += cellWidth;
     }
@@ -88,8 +93,8 @@ fn drawCalendarRow(parent: *vaxis.Window, opts: CalendarRowDrawOpts) !vaxis.Wind
 fn drawCalendarHeaderRow(parent: *vaxis.Window) !vaxis.Window {
     var window = parent.child(.{});
 
-    const days = [7][]const u8{ " Mo", " Tu", " We", " Th", " Fr", " Sa", " Su" };
-    _ = try drawCalendarRow(&window, .{ .cellTexts = days });
+    const days = [7][]const u8{ "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday" };
+    _ = try drawCalendarRow(&window, .{ .cellTexts = days, .isHeaderRow = true });
 
     return window;
 }
@@ -105,7 +110,7 @@ fn drawCalendarDateRow(parent: *vaxis.Window, opts: DrawCalendarDateRowOpts) !va
 
     var x_off: usize = 0;
     for (opts.cellTexts, 0..) |cellText, col| {
-        var cell = window.child(.{ .x_off = x_off });
+        var cell = window.child(.{ .x_off = x_off, .height = .{ .limit = cellHeight } });
         _ = try drawCalendarDateCell(&cell, .{
             .date = cellText,
             .isSelected = opts.isCursorInRow and opts.cursorCol == col,
@@ -125,23 +130,23 @@ fn drawCalendarDateGrid(parent: *vaxis.Window, opts: DrawCalendarDateGridOpts) !
     var window = parent.child(.{});
 
     const rows = [5][7][]const u8{
-        [7][]const u8{ "   ", "   ", "  1", "  2", "  3", "  4", "  5" },
-        [7][]const u8{ "  6", "  7", "  8", "  9", " 10", " 11", " 12" },
-        [7][]const u8{ " 13", " 14", " 15", " 16", " 17", " 18", " 19" },
-        [7][]const u8{ " 20", " 21", " 22", " 23", " 24", " 25", " 26" },
-        [7][]const u8{ " 27", " 28", " 29", " 30", " 31", "   ", "   " },
+        [7][]const u8{ "  ", "  ", "1 ", "2 ", "3 ", "4 ", "5 " },
+        [7][]const u8{ "6 ", "7 ", "8 ", "9 ", "10", "11", "12" },
+        [7][]const u8{ "13", "14", "15", "16", "17", "18", "19" },
+        [7][]const u8{ "20", "21", "22", "23", "24", "25", "26" },
+        [7][]const u8{ "27", "28", "29", "30", "31", "  ", "  " },
     };
 
     var y_off: usize = 0;
 
     for (rows, 0..) |row, rowIdx| {
-        var rowContainer = window.child(.{ .y_off = y_off });
+        var rowContainer = window.child(.{ .y_off = y_off, .height = .{ .limit = cellHeight } });
         _ = try drawCalendarDateRow(&rowContainer, .{
             .cellTexts = row,
             .isCursorInRow = opts.cursorPosition.y == rowIdx,
             .cursorCol = opts.cursorPosition.x,
         });
-        y_off += 1;
+        y_off += cellHeight;
     }
 
     return window;
