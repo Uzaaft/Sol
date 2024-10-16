@@ -48,7 +48,7 @@ pub const App = struct {
             .tty = try vaxis.Tty.init(),
             .vx = try vaxis.init(allocator, .{}),
             .mouse = null,
-            .state = .{ .activePanel = Panel.events },
+            .state = .{ .activePanel = Panel.calendar },
         };
     }
 
