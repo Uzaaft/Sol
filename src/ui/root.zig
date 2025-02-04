@@ -13,9 +13,9 @@ pub const RootDrawOpts = struct {
 pub fn draw(win: *vaxis.Window, opts: RootDrawOpts) !void {
     var container = VerticalSplitLayout.draw(win);
 
-    _ = try EventsPanel.draw(&container.left, .{ .isActivePanel = opts.activePanel == Panel.events });
-    _ = try CalendarPanel.draw(&container.right, .{
+    _ = try CalendarPanel.draw(&container.left, .{
         .isActivePanel = opts.activePanel == Panel.calendar,
         .calendarCursorPosition = opts.calendarCursorPosition,
     });
+    _ = try EventsPanel.draw(&container.right, .{ .isActivePanel = opts.activePanel == Panel.events });
 }
